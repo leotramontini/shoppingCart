@@ -1,0 +1,66 @@
+version: "3"
+
+services:
+  application:
+    build:
+      context: ./build
+    container_name: application
+    privileged: true
+    volumes:
+      - ./supervisor/:/etc/supervisor/conf.d/
+      - ./:/var/www/html/shoppingCart/
+      - ./vhost/:/etc/nginx/sites-enabled/
+      - ./ssl/certsdesk:/etc/ssl/certsdesk
+      - ./ssl/private:/etc/ssl/private
+      - ~/.ssh/:/home/docker/.ssh/
+    links:
+      - "mysql:mysql"
+    depends_on:
+      - mysql
+    expose:
+      - "80"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "1080:1080"
+      - "9090:9090"
+    command: "/usr/bin/supervisord -n"
+    tty: true
+    environment:
+      - XDEBUG_CONFIG=remote_host=
+      - PHP_IDE_CONFIG=serverName=Xdebug
+      - ENCRYPT_KEY=Ca2D46c86bD314a1E62eDd967b365bAa
+    networks:
+      - proxy-tier
+
+  mysql:
+    image: mysql:5.7
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_USER: shoppingCart
+      MYSQL_PASSWORD: shoppingCart
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: shoppingCart
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    networks:
+      - proxy-tier
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+      - "mysql:mysql"
+    networks:
+      - proxy-tier
+
+networks:
+  proxy-tier:
+    driver: bridge
+
