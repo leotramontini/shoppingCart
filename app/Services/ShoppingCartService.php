@@ -103,8 +103,7 @@ class ShoppingCartService
 
         $shoppingCart = $this->getShoppingCartById(Arr::get($inputs, 'shopping_cart_id'))->first();
         $total = Arr::get($inputs, 'price') + $shoppingCart->total;
-        $this->shoppingCartRepository->update(['total' => $total], $shoppingCart->id);
-        return $shoppingCart->refresh();
+        return $this->updateShoppingCartTotal($total, $shoppingCart->id);
     }
 
     /**
@@ -156,7 +155,7 @@ class ShoppingCartService
             DB::beginTransaction();
             $this->shoppingCartProductsRepository->delete($shoppingCartProduct->id);
             $total = $shoppingCart->total - $shoppingCartProduct->price;
-            $this->shoppingCartRepository->update(['total' => $total], $shoppingCartId);
+            $this->updateShoppingCartTotal($total, $shoppingCartId);
             DB::commit();
             return [
                 'id'        => $shoppingCart->id,
@@ -187,7 +186,7 @@ class ShoppingCartService
             $shoppingCartProductIds = $shoppingCartProducts->pluck('id')->all();
             DB::beginTransaction();
             $this->shoppingCartProductsRepository->deleteWhere([['id', 'IN', $shoppingCartProductIds]]);
-            $this->shoppingCartRepository->update(['total' => 0], $shoppingCartId);
+            $this->updateShoppingCartTotal(0, $shoppingCartId);
             DB::commit();
             return [
                 'id'        => $shoppingCart->id,
