@@ -63,7 +63,7 @@ class ShoppingCartController extends Controller
     public function removeProduct(Request $request, int $shoppingCartId, int $productId)
     {
         try {
-            $shoppingCart = $this->shoppingCartService->removeProductFromCart($shoppingCartId, $productId);
+            $shoppingCart = $this->shoppingCartService->removeProductFromShoppingCart($shoppingCartId, $productId);
             return response()->json($shoppingCart);
         } catch (Exception $error) {
             return response()->json([

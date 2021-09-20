@@ -141,7 +141,7 @@ class ShoppingCartService
      * @return array
      * @throws \App\Exceptions\ShoppingCartServiceException
      */
-    public function removeProductFromCart($shoppingCartId, $productId)
+    public function removeProductFromShoppingCart($shoppingCartId, $productId)
     {
         try {
             $shoppingCart           = $this->shoppingCartRepository->find($shoppingCartId);
