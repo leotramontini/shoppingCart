@@ -11,7 +11,9 @@ class ShoppingCartProduct extends Model
 
     protected $fillable = [
         'product_id',
-        'shopping_cart_id'
+        'shopping_cart_id',
+        'price',
+        'quantity'
     ];
 
     protected $casts = [
