@@ -226,7 +226,7 @@ class ShoppingCartService
      * @param \Illuminate\Support\Collection $shoppingCartProducts
      * @return array
      */
-    public function getUpdatedProducts($shoppingCartProducts)
+    public function getUpdatedProducts(Collection $shoppingCartProducts)
     {
         $shoppingCartProductIds = $shoppingCartProducts->pluck('product_id')->all();
         $products               = $this->productRepository
