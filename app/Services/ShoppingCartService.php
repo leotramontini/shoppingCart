@@ -81,11 +81,11 @@ class ShoppingCartService
             DB::rollBack();
             throw new ShoppingCartServiceException($error->getMessage());
         }
-
+        $products = $this->getUpdatedProducts($shoppingCart->shoppingCartProducts()->get());
         return [
             'id'        => $shoppingCart->id,
             'total'     => $shoppingCart->total,
-            'products'  => $shoppingCart->shoppingCartProducts()->get(['product_id', 'quantity', 'price'])
+            'products'  => $products
         ];
     }
 
@@ -157,10 +157,11 @@ class ShoppingCartService
             $total = $shoppingCart->total - $shoppingCartProduct->price;
             $this->updateShoppingCartTotal($total, $shoppingCartId);
             DB::commit();
+            $products = $this->getUpdatedProducts($shoppingCart->shoppingCartProducts()->get());
             return [
                 'id'        => $shoppingCart->id,
                 'total'     => $total,
-                'products'  => $shoppingCart->shoppingCartProducts()->get(['product_id', 'quantity', 'price'])
+                'products'  => $products
             ];
         } catch (Exception $error) {
             DB::rollBack();
@@ -191,7 +192,7 @@ class ShoppingCartService
             return [
                 'id'        => $shoppingCart->id,
                 'total'     => 0,
-                'products'  => $shoppingCart->shoppingCartProducts()->get(['product_id', 'quantity', 'price'])
+                'products'  => []
             ];
         } catch (Exception $error) {
             DB::rollBack();
