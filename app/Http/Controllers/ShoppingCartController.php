@@ -71,4 +71,21 @@ class ShoppingCartController extends Controller
             ], 404);
         }
     }
+
+    /**
+     * @param Request $request
+     * @param int $shoppingCartId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function clearProduct(Request $request, int $shoppingCartId)
+    {
+        try {
+            $shoppingCart = $this->shoppingCartService->clearProduct($shoppingCartId);
+            return response()->json($shoppingCart);
+        } catch (Exception $error) {
+            return response()->json([
+                'message' => $error->getMessage()
+            ], 404);
+        }
+    }
 }

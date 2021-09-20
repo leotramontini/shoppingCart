@@ -21,5 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('shoppingCart')->group(function () {
     Route::post('/adding/product', 'App\Http\Controllers\ShoppingCartController@addingProduct');
     Route::delete('/{shoppingCartId}/product/{productId}', 'App\Http\Controllers\ShoppingCartController@removeProduct');
-
+    Route::put('/{shoppingCartId}/clear', 'App\Http\Controllers\ShoppingCartController@clearProduct');
 });

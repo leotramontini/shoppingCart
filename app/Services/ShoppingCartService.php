@@ -4,11 +4,11 @@ namespace App\Services;
 
 use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use App\Repositories\ProductRepository;
 use App\Repositories\ShoppingCartRepository;
 use App\Exceptions\ShoppingCartServiceException;
 use App\Repositories\ShoppingCartProductsRepository;
-use Illuminate\Support\Facades\DB;
 
 class ShoppingCartService
 {
@@ -160,6 +160,37 @@ class ShoppingCartService
             return [
                 'id'        => $shoppingCart->id,
                 'total'     => $total,
+                'products'  => $shoppingCart->shoppingCartProducts()->get(['product_id', 'quantity', 'price'])
+            ];
+        } catch (Exception $error) {
+            DB::rollBack();
+            throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
+        }
+    }
+
+    /**
+     * @param int $shoppingCartId
+     * @return array
+     * @throws \App\Exceptions\ShoppingCartServiceException
+     */
+    public function clearProduct(int $shoppingCartId)
+    {
+        try {
+            $shoppingCart           = $this->shoppingCartRepository->find($shoppingCartId);
+            $shoppingCartProducts   = $shoppingCart->shoppingCartProducts()->get();
+
+            if ($shoppingCartProducts->isEmpty() && $shoppingCart->total == 0) {
+                throw new ShoppingCartServiceException('Shopping cart is already empty');
+            }
+
+            $shoppingCartProductIds = $shoppingCartProducts->pluck('id')->all();
+            DB::beginTransaction();
+            $this->shoppingCartProductsRepository->deleteWhere([['id', 'IN', $shoppingCartProductIds]]);
+            $this->shoppingCartRepository->update(['total' => 0], $shoppingCartId);
+            DB::commit();
+            return [
+                'id'        => $shoppingCart->id,
+                'total'     => 0,
                 'products'  => $shoppingCart->shoppingCartProducts()->get(['product_id', 'quantity', 'price'])
             ];
         } catch (Exception $error) {
