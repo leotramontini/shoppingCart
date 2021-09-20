@@ -54,7 +54,13 @@ class ShoppingCartController extends Controller
         }
     }
 
-    public function removeProduct(Request $request, $shoppingCartId, $productId)
+    /**
+     * @param Request $request
+     * @param int $shoppingCartId
+     * @param int $productId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeProduct(Request $request, int $shoppingCartId, int $productId)
     {
         try {
             $shoppingCart = $this->shoppingCartService->removeProductFromCart($shoppingCartId, $productId);

@@ -109,7 +109,7 @@ class ShoppingCartService
     /**
      * @param int $shoppingCartId
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection|mixed
-     * @throws ShoppingCartServiceException
+     * @throws \App\Exceptions\ShoppingCartServiceException
      */
     public function getShoppingCartById(int $shoppingCartId)
     {
@@ -135,6 +135,12 @@ class ShoppingCartService
         }
     }
 
+    /**
+     * @param int $shoppingCartId
+     * @param int $productId
+     * @return array
+     * @throws \App\Exceptions\ShoppingCartServiceException
+     */
     public function removeProductFromCart($shoppingCartId, $productId)
     {
         try {
