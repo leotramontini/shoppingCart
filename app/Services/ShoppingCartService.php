@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\ShoppingCart;
 use Exception;
 use Illuminate\Support\Arr;
+use App\Models\ShoppingCart;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\ProductRepository;
+use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\ShoppingCartRepository;
 use App\Exceptions\ShoppingCartServiceException;
 use App\Repositories\ShoppingCartProductsRepository;
@@ -59,7 +60,8 @@ class ShoppingCartService
             }
 
             DB::beginTransaction();
-            $shoppingCart   = $this->findOrCreateShoppingCart($inputs);
+            $inputs['price']    = $product->price;
+            $shoppingCart       = $this->findOrCreateShoppingCart($inputs);
 
             if ($product->quantity < Arr::get($inputs, 'quantity')) {
                 throw new ShoppingCartServiceException('Product request quantity bigger than stock quantity');
@@ -73,7 +75,7 @@ class ShoppingCartService
             $this->shoppingCartProductsRepository->create([
                 'product_id'        => $product->id,
                 'shopping_cart_id'  => $shoppingCart->id,
-                'price'             => Arr::get($inputs, 'price'),
+                'price'             => $product->price,
                 'quantity'          => Arr::get($inputs, 'quantity')
             ]);
             DB::commit();
@@ -82,6 +84,8 @@ class ShoppingCartService
             throw new ShoppingCartServiceException($error->getMessage());
         }
         $products = $this->getUpdatedProducts($shoppingCart->shoppingCartProducts()->get());
+        $shoppingCart->refresh();
+
         return [
             'id'        => $shoppingCart->id,
             'total'     => $shoppingCart->total,
@@ -97,12 +101,13 @@ class ShoppingCartService
      */
     public function findOrCreateShoppingCart(array $inputs)
     {
+        $productTotal = (Arr::get($inputs, 'price') * Arr::get($inputs, 'quantity'));
         if (!Arr::get($inputs, 'shopping_cart_id')) {
-            return $this->createShoppingCart(Arr::get($inputs, 'price'));
+            return $this->createShoppingCart($productTotal);
         }
 
         $shoppingCart = $this->getShoppingCartById(Arr::get($inputs, 'shopping_cart_id'))->first();
-        $total = Arr::get($inputs, 'price') + $shoppingCart->total;
+        $total =  $productTotal + $shoppingCart->total;
         return $this->updateShoppingCartTotal($total, $shoppingCart->id);
     }
 
@@ -154,9 +159,10 @@ class ShoppingCartService
 
             DB::beginTransaction();
             $this->shoppingCartProductsRepository->delete($shoppingCartProduct->id);
-            $total = $shoppingCart->total - $shoppingCartProduct->price;
+            $total = $shoppingCart->total - ($shoppingCartProduct->price * $shoppingCartProduct->quantity);
             $this->updateShoppingCartTotal($total, $shoppingCartId);
             DB::commit();
+
             $products = $this->getUpdatedProducts($shoppingCart->shoppingCartProducts()->get());
             return [
                 'id'        => $shoppingCart->id,
@@ -212,6 +218,7 @@ class ShoppingCartService
             $shoppingCartProducts   = $shoppingCart->shoppingCartProducts()->get();
             $products               = $this->getUpdatedProducts($shoppingCartProducts, $shoppingCart);
             $shoppingCart           = $this->updateShoppingCartTotalByProducts($products, $shoppingCart);
+
             return [
                 'id'        => $shoppingCart->id,
                 'total'     => $shoppingCart->total,
@@ -224,7 +231,7 @@ class ShoppingCartService
 
     /**
      * @param \Illuminate\Support\Collection $shoppingCartProducts
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
     public function getUpdatedProducts(Collection $shoppingCartProducts)
     {
@@ -247,21 +254,23 @@ class ShoppingCartService
             ];
         }
 
-        return $updatedProducts;
+        return collect($updatedProducts);
     }
 
     /**
-     * @param array $products
+     * @param \Illuminate\Support\Collection $products
      * @param \App\Models\ShoppingCart $shoppingCart
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection|mixed
      * @throws \App\Exceptions\ShoppingCartServiceException
      */
-    public function updateShoppingCartTotalByProducts(array $products, ShoppingCart $shoppingCart)
+    public function updateShoppingCartTotalByProducts($products, ShoppingCart $shoppingCart)
     {
         try {
-            $products   = collect($products);
-            $prices     = $products->pluck('price')->all();
-            return $this->updateShoppingCartTotal(array_sum($prices), $shoppingCart->id);
+            $total = 0;
+            foreach ($products as $product) {
+                $total += $product['price'] * $product['quantity'];
+            }
+            return $this->updateShoppingCartTotal($total, $shoppingCart->id);
         } catch (Exception $error) {
             throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
         }
