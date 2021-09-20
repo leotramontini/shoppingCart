@@ -211,7 +211,7 @@ class ShoppingCartService
             $shoppingCart           = $this->shoppingCartRepository->find($shoppingCartId);
             $shoppingCartProducts   = $shoppingCart->shoppingCartProducts()->get();
             $products               = $this->getUpdatedProducts($shoppingCartProducts, $shoppingCart);
-            $shoppingCart = $this->updateShoppingCartTotalByProducts($products, $shoppingCart);
+            $shoppingCart           = $this->updateShoppingCartTotalByProducts($products, $shoppingCart);
             return [
                 'id'        => $shoppingCart->id,
                 'total'     => $shoppingCart->total,
