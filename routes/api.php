@@ -30,4 +30,8 @@ Route::prefix('shoppingCart')->group(function () {
 
     Route::get('/{shoppingCartId}', 'App\Http\Controllers\ShoppingCartController@getById')
         ->where('shoppingCartId', '[0-9]+');
+
+    Route::patch('/{shoppingCartId}/product/{productId}/updateQuantity', 'App\Http\Controllers\ShoppingCartController@updateProductQuantity')
+        ->where('shoppingCartId', '[0-9]+')
+        ->where('productId', '[0-9]+');
 });

@@ -290,4 +290,54 @@ class ShoppingCartService
             throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
         }
     }
+
+    /**
+     * @param int $shoppingCartId
+     * @param int $productId
+     * @param int $quantity
+     * @return array
+     * @throws \App\Exceptions\ShoppingCartServiceException
+     */
+    public function updateProductQuantity(int $shoppingCartId, int $productId, int $quantity)
+    {
+        try {
+            $shoppingCart         = $this->shoppingCartRepository->find($shoppingCartId);
+            $shoppingCartProducts = $shoppingCart->shoppingCartProducts()->get();
+            $shoppingCartProduct  = $shoppingCartProducts->where('product_id', $productId)->first();
+
+            if (!$shoppingCartProduct) {
+                throw new ShoppingCartServiceException('Product not found in shopping cart', 404);
+            }
+
+            if ($shoppingCartProduct->quantity == $quantity) {
+                throw new ShoppingCartServiceException('Quantity already update', 422);
+            }
+
+            $product = $this->productRepository->find($productId);
+            if ($product->quantity < $quantity) {
+                throw new ShoppingCartServiceException('Request quantity is bigger than stock quantity', 400);
+            }
+
+            $total = $shoppingCart->total;
+            $total -= $shoppingCartProduct->quantity * $shoppingCartProduct->price;
+            $total += $quantity * $shoppingCartProduct->price;
+
+            DB::beginTransaction();
+            $this->shoppingCartProductsRepository->update(['quantity' => $quantity], $shoppingCartProduct->id);
+            $this->updateShoppingCartTotal($total, $shoppingCart->id);
+            DB::commit();
+
+            $products = $this->getUpdatedProducts($shoppingCart->shoppingCartProducts()->get());
+            $shoppingCart->refresh();
+
+            return [
+                'id'        => $shoppingCart->id,
+                'total'     => $shoppingCart->total,
+                'products'  => $products
+            ];
+        } catch (Exception $error) {
+            DB::rollBack();
+            throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
+        }
+    }
 }

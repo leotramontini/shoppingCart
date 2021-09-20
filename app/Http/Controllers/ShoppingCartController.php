@@ -105,4 +105,34 @@ class ShoppingCartController extends Controller
             ], 404);
         }
     }
+
+    /**
+     * @param Request $request
+     * @param int $shoppingCartId
+     * @param int $productId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProductQuantity(Request $request, int $shoppingCartId, int $productId)
+    {
+        try {
+            $inputs = $request->all();
+
+            $validator = Validator::make($inputs, [
+                'quantity'  => 'required|int|min:1'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => Arr::first($validator->getMessageBag()->getMessages())[0]
+                ], 422);
+            }
+
+            $shoppingCart = $this->shoppingCartService->updateProductQuantity($shoppingCartId, $productId, $inputs['quantity']);
+            return response()->json($shoppingCart);
+        } catch (Exception $error) {
+            return response()->json([
+                'message' => $error->getMessage()
+            ], 404);
+        }
+    }
 }
