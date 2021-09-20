@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ShoppingCart;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -195,6 +196,88 @@ class ShoppingCartService
             ];
         } catch (Exception $error) {
             DB::rollBack();
+            throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
+        }
+    }
+
+    /**
+     * @param int $shoppingCartId
+     * @return array
+     * @throws \App\Exceptions\ShoppingCartServiceException
+     */
+    public function getById(int $shoppingCartId)
+    {
+        try {
+            $shoppingCart           = $this->shoppingCartRepository->find($shoppingCartId);
+            $shoppingCartProducts   = $shoppingCart->shoppingCartProducts()->get();
+            $products               = $this->getUpdatedProducts($shoppingCartProducts, $shoppingCart);
+            $shoppingCart = $this->updateShoppingCartTotalByProducts($products, $shoppingCart);
+            return [
+                'id'        => $shoppingCart->id,
+                'total'     => $shoppingCart->total,
+                'products'  => $products
+            ];
+        } catch (Exception $error) {
+            throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
+        }
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection $shoppingCartProducts
+     * @return array
+     */
+    public function getUpdatedProducts($shoppingCartProducts)
+    {
+        $shoppingCartProductIds = $shoppingCartProducts->pluck('product_id')->all();
+        $products               = $this->productRepository
+                                    ->findWhereIn('id', $shoppingCartProductIds)
+                                    ->where('enable', '=', true);
+        $updatedProducts = [];
+        foreach ($shoppingCartProducts as $shoppingCartProduct) {
+            $product = $products->where('id', $shoppingCartProduct->product_id)->first();
+            if ($product->quantity < $shoppingCartProduct->quantity) {
+                continue;
+            }
+            $updatedProducts[] = [
+                'id'            =>$shoppingCartProduct->id,
+                'product_id'    => $product->id,
+                'name'          => $product->name,
+                'price'         => $product->price,
+                'quantity'      => $shoppingCartProduct->quantity
+            ];
+        }
+
+        return $updatedProducts;
+    }
+
+    /**
+     * @param array $products
+     * @param \App\Models\ShoppingCart $shoppingCart
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection|mixed
+     * @throws \App\Exceptions\ShoppingCartServiceException
+     */
+    public function updateShoppingCartTotalByProducts(array $products, ShoppingCart $shoppingCart)
+    {
+        try {
+            $products   = collect($products);
+            $prices     = $products->pluck('price')->all();
+            return $this->updateShoppingCartTotal(array_sum($prices), $shoppingCart->id);
+        } catch (Exception $error) {
+            throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
+        }
+    }
+
+    /**
+     * @param float $total
+     * @param int $shoppingCartId
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection|mixed
+     * @throws \App\Exceptions\ShoppingCartServiceException
+     */
+    public function updateShoppingCartTotal(float $total, int $shoppingCartId)
+    {
+        try {
+            return $this->shoppingCartRepository->update(['total' => $total], $shoppingCartId);
+        } catch (Exception $error) {
             throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
         }
     }

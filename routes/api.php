@@ -25,4 +25,6 @@ Route::prefix('shoppingCart')->group(function () {
         ->where('productId', '[0-9]+');
     Route::put('/{shoppingCartId}/clear', 'App\Http\Controllers\ShoppingCartController@clearProduct')
         ->where('shoppingCartId', '[0-9]+');
+    Route::get('/{shoppingCartId}', 'App\Http\Controllers\ShoppingCartController@getById')
+        ->where('shoppingCartId', '[0-9]+');
 });
