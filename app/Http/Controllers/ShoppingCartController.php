@@ -53,4 +53,16 @@ class ShoppingCartController extends Controller
             ], 404);
         }
     }
+
+    public function removeProduct(Request $request, $shoppingCartId, $productId)
+    {
+        try {
+            $shoppingCart = $this->shoppingCartService->removeProductFromCart($shoppingCartId, $productId);
+            return response()->json($shoppingCart);
+        } catch (Exception $error) {
+            return response()->json([
+                'message' => $error->getMessage()
+            ], 404);
+        }
+    }
 }

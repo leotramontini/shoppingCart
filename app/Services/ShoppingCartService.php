@@ -134,4 +134,31 @@ class ShoppingCartService
             throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
         }
     }
+
+    public function removeProductFromCart($shoppingCartId, $productId)
+    {
+        try {
+            $shoppingCart           = $this->shoppingCartRepository->find($shoppingCartId);
+            $shoppingCartProducts   = $shoppingCart->shoppingCartProducts()->get();
+            $shoppingCartProduct    = $shoppingCartProducts->where('product_id', $productId)->first();
+
+            if (!$shoppingCartProduct) {
+                throw new ShoppingCartServiceException('Product not found in shopping cart', 404);
+            }
+
+            DB::beginTransaction();
+            $this->shoppingCartProductsRepository->delete($shoppingCartProduct->id);
+            $total = $shoppingCart->total - $shoppingCartProduct->price;
+            $this->shoppingCartRepository->update(['total' => $total], $shoppingCartId);
+            DB::commit();
+            return [
+                'id'        => $shoppingCart->id,
+                'total'     => $total,
+                'products'  => $shoppingCart->shoppingCartProducts()->get(['product_id', 'quantity', 'price'])
+            ];
+        } catch (Exception $error) {
+            DB::rollBack();
+            throw new ShoppingCartServiceException($error->getMessage(), $error->getCode());
+        }
+    }
 }
