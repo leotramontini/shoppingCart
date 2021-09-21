@@ -1,4 +1,4 @@
-.PHONY: help up down install create-hosts run-migrations rollback-migrations
+.PHONY: help up down install create-hosts run-migrations rollback-migrations tests
 
 help:
 	@grep -E '^[a-zA-Z-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "[32m%-15s[0m %s\n", $$1, $$2}'
@@ -20,3 +20,6 @@ run-migrations: ## Run migrations
 
 rollback-migrations: ## Rollback migrations
 	docker exec application php artisan migrate:rollback
+
+tests: ## Run tests
+	docker exec application vendor/bin/phpunit --testdox
