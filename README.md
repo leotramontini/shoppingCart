@@ -1,64 +1,100 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### Carrinho de e-commerce :computer:
 
-## About Laravel
+<img src="https://img.shields.io/static/v1?label=Licese&message=MIT&color=blue&style=for-the-badge"/> <img src="https://img.shields.io/static/v1?label=PHP&message=7.3.30&color=purple&style=for-the-badge&logo=PHP"/> <img src="https://img.shields.io/static/v1?label=LARAVEL&message=8.54&color=red&style=for-the-badge&logo=LARAVEL"/>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Tópicos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+:small_blue_diamond: [Descrição do projeto](#descrição-do-projeto)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+:small_blue_diamond: [Features](#features)
 
-## Learning Laravel
+:small_blue_diamond: [Pré-requisitos](#pré-requisitos)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+:small_blue_diamond: [Como rodar a aplicação ](#como-rodar-a-aplicação-arrow_forward)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+:small_blue_diamond: [Documentação dos endpoints ](#documentação-dos-endpoints)
 
-## Laravel Sponsors
+:small_blue_diamond: [Como rodar os testes ](#como-rodar-os-testes)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
 
-### Premium Partners
+## Descrição do Projeto
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
+Desenvolver um sistema de carrinho de e-commerce.
 
-## Contributing
+### Features
+- Adicionar produto no carrinho
+- Remover um item do carrinho
+- Atualizar a quantidade de um item no carrinho
+- Limpar o carrinho
+- Recuperar o carrinho
+- Retornar um JSON com o carrinho completo
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+> Status do Projeto: Concluido :heavy_check_mark:
 
-## Code of Conduct
+## Pré-requisitos
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+:warning: [Docker](https://www.docker.com/) :whale:
 
-## Security Vulnerabilities
+:warning: [Docker compose](https://docs.docker.com/compose/) :octopus:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Como rodar a aplicação :arrow_forward:
 
-## License
+No terminal, clone o projetom entre na pasta e execute o seguinte comando:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+$ make install
+```
+
+Para cirar o host do projeto basta rodar o seguinte comando:
+
+```
+$ sudo make create-hosts
+```
+
+Rodar as migrations
+
+```
+$ make run-migrations
+```
+
+O projeto estará disponível no seguinte host:
+
+```
+http://shoppingCart.local
+```
+
+## Documentação dos endpoints
+
+Segue o [link](https://documenter.getpostman.com/view/13471330/UUxui9pi) para documentação dos endpoints.
+
+## Como rodar os testes
+
+Para executar os testes é necessário criar uma nova _database_.
+
+Em um browser acesse `localhost:808`, usaremos as seguintes credenciais:
+
+|Server | username  | senha  |
+|------------ | ------------ | ------------ |
+| mysql | root | root  |
+
+Em `Create database` basta inseri o seguinte nome no campo `shoppingCart_test` :arrow_right: `Save`
+
+Em seguida basta rodar o seguinte comando:
+```
+$ make tests
+```
+
+## Linguagens, dependencias e libs utilizadas :books:
+
+- [PHP](https://www.php.net/)
+- [Laravel](https://laravel.com/docs/8.x)
+- [Repository](https://packagist.org/packages/prettus/l5-repository)
+## Licença
+
+The [MIT License]() (MIT)
+
+Copyright :copyright: 2021 - Carrinho de e-commerce
+
+
+
