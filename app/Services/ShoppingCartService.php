@@ -69,7 +69,7 @@ class ShoppingCartService
 
             $products = $shoppingCart->shoppingCartProducts()->get();
             if (!$products->where('product_id', $product->id)->isEmpty()) {
-                throw new ShoppingCartServiceException('Product already in shopping cart');
+                throw new ShoppingCartServiceException('Product is already in shopping cart');
             }
 
             $this->shoppingCartProductsRepository->create([
